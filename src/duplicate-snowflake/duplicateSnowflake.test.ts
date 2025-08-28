@@ -37,7 +37,7 @@ describe("Snowflake basics", () => {
     }
   });
 
-  test.only("check 2 duplicate snowflake types in-place", () => {
+  test("check 2 duplicate snowflake types in-place", () => {
     const pointsOriginal: SixNumbers = [3, 4, 1, 8, 4, 3];
     const pointsDifferent: SixNumbers = [3, 4, 1, 2, 4, 3];
 
@@ -64,7 +64,7 @@ describe("Snowflake basics", () => {
     ).toStrictEqual(linearPointsRotatedOne);
   });
 
-  test.only("check if 2 snowflakes are duplicates after known offset", () => {
+  test("check if 2 snowflakes are duplicates after known offset", () => {
     const linearPoints = makeSixNumbers((i) => i);
     const linearPointsRotatedByOne = makeSixNumbers(
       (i) => (i + 1) % Snowflake.numPoints,
@@ -96,7 +96,7 @@ describe("Snowflake basics", () => {
     ).toStrictEqual(true);
   });
 
-  test.only("check if duplicate offset snowflakes are detected", () => {
+  test("check if duplicate offset snowflakes are detected", () => {
     const linearPoints = makeSixNumbers((i) => i);
     const linearPointsRotatedByOne = makeSixNumbers(
       (i) => (i + 1) % Snowflake.numPoints,
@@ -130,37 +130,10 @@ describe("Snowflake basics", () => {
     ).toBe(false);
   });
 
-  test.skip("check duplicate snowflake after rotation", () => {
-    const pointsOriginal: SixNumbers = [1, 2, 3, 4, 5, 6];
-    const pointsShiftLeftOne: SixNumbers = [
-      ...pointsOriginal.slice(1, 6),
-      pointsOriginal[0],
-    ] as SixNumbers; //   [2, 3, 4, 5, 6, 1];
-    const pointsShiftRightThree: SixNumbers = [
-      ...pointsOriginal.slice(3, 6),
-      ...pointsOriginal.slice(0, 3),
-    ] as SixNumbers;
-    const pointsAlmostShifted: SixNumbers = [5, 6, 2, 3, 4, 1];
 
-    expect(
-      checkDuplicateRotated(
-        new Snowflake(pointsOriginal),
-        new Snowflake(pointsShiftLeftOne),
-      ),
-    ).toBe(true);
-    expect(
-      checkDuplicateRotated(
-        new Snowflake(pointsOriginal),
-        new Snowflake(pointsShiftRightThree),
-      ),
-    ).toBe(true);
-    expect(
-      checkDuplicateRotated(
-        new Snowflake(pointsOriginal),
-        new Snowflake(pointsAlmostShifted),
-      ),
-    ).toBe(false);
+  /* Next Tests */
+  test("reverse the snowflake points")
 
-    // const pointsFlippedShiftLeftTwo = []
-  });
+  // Idea: can you call the offset fxn but also handle the first index (default args)
+  test("check if the reversed snowflake is a duplicate")
 });
