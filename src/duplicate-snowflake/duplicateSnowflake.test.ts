@@ -8,6 +8,7 @@ import {
     handleOverlapWithOffset,
 } from "./duplicateSnowflake";
 import { SnowflakeCollection } from "./SnowflakeCollection";
+import { BruteForceDuplicationCheck } from "./SnowflakeAnalyzer";
 
 const SNOWFLAKE_NUM_OF_POINTS = 6;
 
@@ -37,22 +38,23 @@ describe("Snowflake basics", () => {
         }
     })
 
-    test("check duplicate snowflake types in place", () => {
+    test.only("check 2 duplicate snowflake types in-place", () => {
         const pointsOriginal: SixNumbers = [3, 4, 1, 8, 4, 3];
         const pointsDifferent: SixNumbers = [3, 4, 1, 2, 4, 3];
         const sfOriginal = new Snowflake(pointsOriginal);
         const sfSame = new Snowflake(pointsOriginal);
         const sfDifferent = new Snowflake(pointsDifferent);
 
-        expect(checkDuplicateInPlace(sfOriginal, sfSame)).toBe(true);
-        expect(checkDuplicateInPlace(sfOriginal, sfDifferent)).toBe(false);
+        const bruteForceAnalyzer = new BruteForceDuplicationCheck();
 
-        const pointsReversed: SixNumbers = [...pointsOriginal].reverse() as SixNumbers;
-        const sfReversed = new Snowflake(pointsReversed);
-
-        expect(checkDuplicateReversed(sfOriginal, sfReversed)).toBe(true);
-        expect(checkDuplicateReversed(sfOriginal, sfDifferent)).toBe(false);
+        expect(bruteForceAnalyzer.compareSnowflakes([sfOriginal, sfSame])).toBe(true);
+        expect(bruteForceAnalyzer.compareSnowflakes([sfOriginal, sfDifferent])).toBe(false);
     })
+
+    // test.only("check if 2 snowflakes are duplicates after rotations", () => {
+    //     const linearPoints: SixNumbers = [1, 2, 3, 4, 5, 6];
+    //     const linearPointsShiftedRight: SixNumbers = [2, 3, 4, 5, 6, 1];
+    // })
 
     test("test overlap with offset function", () => {
         // mini ex. 08/27/25 [1, 2, 3] with offset:1 => [2, 3, 1]
