@@ -1,10 +1,29 @@
 import { Snowflake, SixNumbers } from "./snowflake";
 
-export interface SnowflakeDuplicateStrategy {
-  //   compareSnowflakePoints(snowflakes: Snowflake[]): boolean;
-}
+// export interface SnowflakeDuplicateStrategy {
+//     compareSnowflakePoints(snowflakes: Snowflake[]): boolean;
+// }
 
-export class BruteForceDuplicationCheck implements SnowflakeDuplicateStrategy {  
+export class BruteForceDuplicationCheck {
+  compareSnowflakes(snowflake: Snowflake[]) {
+    for (let i = 0; i < snowflake.length - 1; i++) {
+      for (let j = i + 1; j < snowflake.length; j++) {
+        if (
+          this.compareSnowflakePoints(snowflake[i].points, snowflake[j].points)
+        ) {
+          return true;
+        }
+        if (this.findDuplicatePointsWithOffset(snowflake[i], snowflake[j], 1)) {
+          return true;
+        }
+        if (this.findDuplicatePointsFlipped(snowflake[i], snowflake[j])) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   compareSnowflakePoints(
     sfPoints1: SixNumbers,
     sfPoints2: SixNumbers,
@@ -43,21 +62,20 @@ export class BruteForceDuplicationCheck implements SnowflakeDuplicateStrategy {
   }
 }
 
-function LogInputs<M extends (...args: unknown[]) => unknown>(
-  target: object,
-  propertyKey: string | symbol,
-  descriptor: TypedPropertyDescriptor<M>,
-): void {
-  const originalMethod = descriptor.value;
-  if (typeof originalMethod !== "function") {
-    throw new Error("LogInputs can only be applied to methods");
+export function LogInputs<This, A extends unknown[], R>(
+  original: (this: This, ...args: A) => R,
+  context: ClassMethodDecoratorContext<This, (this: This, ...args: A) => R>,
+): (this: This, ...args: A) => R {
+  if (context.kind !== "method" || context.private) {
+    throw new Error("LogInputs can only be applied to public methods");
   }
 
-  descriptor.value = function (
-    this: ThisParameterType<M>,
-    ...args: Parameters<M>
-  ): ReturnType<M> {
-    console.log(`Calling ${String(propertyKey)} with arguments:`, args);
-    return originalMethod.apply(this, args) as ReturnType<M>;
-  } as M;
+  return function (this: This, ...args: A): R {
+    try {
+      console.log(`Calling ${String(context.name)} with arguments:`, ...args);
+    } catch {
+      console.log(`Calling ${String(context.name)} with <unprintable args>`);
+    }
+    return original.apply(this, args);
+  };
 }

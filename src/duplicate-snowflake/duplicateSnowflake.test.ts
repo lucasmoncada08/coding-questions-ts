@@ -1,12 +1,5 @@
 import { describe, test, expect } from "vitest";
 import { Snowflake, SixNumbers } from "./snowflake";
-import {
-  checkDuplicateSnowflake,
-  checkDuplicateInPlace,
-  checkDuplicateReversed,
-  checkDuplicateRotated,
-  handleOverlapWithOffset,
-} from "./duplicateSnowflake";
 import { SnowflakeCollection } from "./SnowflakeCollection";
 import { BruteForceDuplicationCheck } from "./SnowflakeAnalyzer";
 
@@ -15,6 +8,10 @@ const SNOWFLAKE_NUM_OF_POINTS = 6;
 type numberToNumber = (i: number) => number;
 function makeSixNumbers(fn: numberToNumber): SixNumbers {
   return [...Array(SNOWFLAKE_NUM_OF_POINTS)].map((_, i) => fn(i)) as SixNumbers;
+}
+
+function makeSnowflake(fn: numberToNumber): Snowflake {
+  return new Snowflake(makeSixNumbers(fn));
 }
 
 describe("Snowflake basics", () => {
@@ -144,4 +141,42 @@ describe("Snowflake basics", () => {
       ),
     ).toEqual(true);
   });
+});
+
+describe("comparing multiple snowflakes together", () => {
+  test("comparing 2 duplicate snowflakes together", () => {
+    const snowflakes: Snowflake[] = [
+      makeSnowflake((i) => i),
+      makeSnowflake((i) => (i + 1) % Snowflake.numPoints), // shifted
+    ];
+
+    const bruteForceAnalyzer = new BruteForceDuplicationCheck();
+    expect(bruteForceAnalyzer.compareSnowflakes(snowflakes)).toBe(true);
+  });
+
+  test("comparing 3 duplicate snowflakes together", () => {
+    const snowflakes: Snowflake[] = [
+      makeSnowflake((i) => i),
+      makeSnowflake((i) => i % 4),
+    ];
+
+    const bruteForceAnalyzer = new BruteForceDuplicationCheck();
+    expect(bruteForceAnalyzer.compareSnowflakes(snowflakes)).toBe(false);
+
+    snowflakes.push(
+      makeSnowflake((i) => (i + 3) % Snowflake.numPoints), // shifted
+    );
+    expect(bruteForceAnalyzer.compareSnowflakes(snowflakes)).toBe(true);
+  });
+
+  test("compare 5 duplicate snowflakes together", () => {
+    const snowflakes: Snowflake[] = [
+      makeSnowflake((i) => i),
+    ];
+
+    const bruteForceAnalyzer = new BruteForceDuplicationCheck();
+    expect(bruteForceAnalyzer.compareSnowflakes(snowflakes)).toBe(true);
+  });
+
+  // makeSnowflake(i => (-i-1) + Snowflake.numPoints), // reverse
 });
