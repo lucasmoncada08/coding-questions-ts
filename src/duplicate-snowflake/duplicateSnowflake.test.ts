@@ -106,6 +106,7 @@ describe("Snowflake basics", () => {
       bruteForceAnalyzer.findDuplicatePointsWithOffset(
         new Snowflake(linearPoints),
         new Snowflake(linearPointsRotatedByOne),
+        1,
       ),
     ).toBe(true);
 
@@ -116,24 +117,31 @@ describe("Snowflake basics", () => {
       bruteForceAnalyzer.findDuplicatePointsWithOffset(
         new Snowflake(linearPoints),
         new Snowflake(linearPointsRotatedByFive),
+        1,
       ),
     ).toBe(true);
 
-    const linearPointsIncrementedBy1 = makeSixNumbers(
-      (i) => i + 1,
-    );
+    const linearPointsIncrementedBy1 = makeSixNumbers((i) => i + 1);
     expect(
       bruteForceAnalyzer.findDuplicatePointsWithOffset(
         new Snowflake(linearPoints),
         new Snowflake(linearPointsIncrementedBy1),
+        1,
       ),
     ).toBe(false);
   });
 
+  test("check if the snowflake flipped is duplicate", () => {
+    const linearPoints = makeSixNumbers((i) => i);
+    const linearPointsReversed = [...linearPoints].reverse() as SixNumbers;
 
-  /* Next Tests */
-  test("reverse the snowflake points")
+    const bruteForceAnalyzer = new BruteForceDuplicationCheck();
 
-  // Idea: can you call the offset fxn but also handle the first index (default args)
-  test("check if the reversed snowflake is a duplicate")
+    expect(
+      bruteForceAnalyzer.findDuplicatePointsFlipped(
+        new Snowflake(linearPoints),
+        new Snowflake(linearPointsReversed),
+      ),
+    ).toEqual(true);
+  });
 });
