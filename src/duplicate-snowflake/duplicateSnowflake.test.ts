@@ -23,7 +23,6 @@ function makeSnowflake(fn: numberToNumber): Snowflake {
 }
 
 describe("Snowflake basics", () => {
-  const bruteForceAnalyzer = new BruteForceDuplicationCheck();
   test("create snowflake with points", () => {
     const points = makeSixNumbers((i) => i);
     const snowflake = new Snowflake(points);
@@ -169,14 +168,12 @@ describe("snowflake analyzer testing", () => {
 
     expect(bruteForceAnalyzer.compareSnowflakes(snowflakes)).toBe(false);
 
-    // snowflakes.splice(2, 0, fixtures.linear.trueDuplicates[2]);
-    // expect(bruteForceAnalyzer.compareSnowflakes(snowflakes)).toBe(true);
+    snowflakes.splice(2, 0, fixtures.linear.trueDuplicates[2]);
+    expect(bruteForceAnalyzer.compareSnowflakes(snowflakes)).toBe(true);
   });
-
-  // makeSnowflake(i => (-i-1) + Snowflake.numPoints), // reverse
 });
 
-describe("fixtures-based analzer tests", () => {
+describe("fixtures-based analyzer tests", () => {
   const bruteForceAnalyzer = new BruteForceDuplicationCheck();
 
   test("base linearPoints sanity", () => {
