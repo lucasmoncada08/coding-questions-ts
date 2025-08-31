@@ -23,6 +23,7 @@ function makeSnowflake(fn: numberToNumber): Snowflake {
 }
 
 describe("Snowflake basics", () => {
+  const bruteForceAnalyzer = new BruteForceDuplicationCheck();
   test("create snowflake with points", () => {
     const points = makeSixNumbers((i) => i);
     const snowflake = new Snowflake(points);
@@ -41,12 +42,14 @@ describe("Snowflake basics", () => {
       expect(sf.points).toEqual(pointsLinear);
     }
   });
+});
 
+describe("snowflake analyzer testing", () => {
+  const bruteForceAnalyzer = new BruteForceDuplicationCheck();
+  
   test("check 2 duplicate snowflake types in-place", () => {
     const pointsOriginal: SixNumbers = [3, 4, 1, 8, 4, 3];
     const pointsDifferent: SixNumbers = [3, 4, 1, 2, 4, 3];
-
-    const bruteForceAnalyzer = new BruteForceDuplicationCheck();
 
     expect(
       bruteForceAnalyzer.compareSnowflakePoints(pointsOriginal, pointsOriginal),
@@ -63,7 +66,6 @@ describe("Snowflake basics", () => {
     const linearPoints = makeSixNumbers((i) => i);
     const linearPointsRotatedOne = makeSixNumbers((i) => (i + 1) % N);
 
-    const bruteForceAnalyzer = new BruteForceDuplicationCheck();
     expect(
       bruteForceAnalyzer.getPointsAfterOffset(new Snowflake(linearPoints), 1),
     ).toStrictEqual(linearPointsRotatedOne);
@@ -72,8 +74,6 @@ describe("Snowflake basics", () => {
   test("check if 2 snowflakes are duplicates after known offset", () => {
     const linearPoints = makeSixNumbers((i) => i);
     const linearPointsRotatedByOne = makeSixNumbers((i) => (i + 1) % N);
-
-    const bruteForceAnalyzer = new BruteForceDuplicationCheck();
 
     const offsetOnePoints = bruteForceAnalyzer.getPointsAfterOffset(
       new Snowflake(linearPoints),
@@ -102,7 +102,6 @@ describe("Snowflake basics", () => {
   test("check if duplicate offset snowflakes are detected", () => {
     const linearPoints = makeSixNumbers((i) => i);
     const linearPointsRotatedByOne = makeSixNumbers((i) => (i + 1) % N);
-    const bruteForceAnalyzer = new BruteForceDuplicationCheck();
     expect(
       bruteForceAnalyzer.findDuplicatePointsWithOffset(
         new Snowflake(linearPoints),
@@ -134,8 +133,6 @@ describe("Snowflake basics", () => {
     const linearPoints = makeSixNumbers((i) => i);
     const linearPointsReversed = [...linearPoints].reverse() as SixNumbers;
 
-    const bruteForceAnalyzer = new BruteForceDuplicationCheck();
-
     expect(
       bruteForceAnalyzer.findDuplicatePointsFlipped(
         new Snowflake(linearPoints),
@@ -143,16 +140,12 @@ describe("Snowflake basics", () => {
       ),
     ).toEqual(true);
   });
-});
-
-describe("comparing multiple snowflakes together", () => {
+  
   test("comparing 2 duplicate snowflakes together", () => {
     const snowflakes: Snowflake[] = [
       makeSnowflake((i) => i),
       makeSnowflake((i) => (i + 1) % N), // shifted
     ];
-
-    const bruteForceAnalyzer = new BruteForceDuplicationCheck();
     expect(bruteForceAnalyzer.compareSnowflakes(snowflakes)).toBe(true);
   });
 
@@ -161,27 +154,29 @@ describe("comparing multiple snowflakes together", () => {
       makeSnowflake((i) => i),
       makeSnowflake((i) => i % 4),
     ];
-
-    const bruteForceAnalyzer = new BruteForceDuplicationCheck();
     expect(bruteForceAnalyzer.compareSnowflakes(snowflakes)).toBe(false);
 
     snowflakes.push(makeSnowflake((i) => (i + 3) % N)); // shifted
     expect(bruteForceAnalyzer.compareSnowflakes(snowflakes)).toBe(true);
   });
 
-  // test("compare 5 duplicate snowflakes together", () => {
-  //   const snowflakes: Snowflake[] = [
-  //     makeSnowflake((i) => i),
-  //   ];
+  test.only("compare 5 snowflakes together", () => {
+    
+    const snowflakes: Snowflake[] = [
+      fixtures.linear.base,
+      ...fixtures.linear.falseDuplicates,
+    ];
 
-  //   const bruteForceAnalyzer = new BruteForceDuplicationCheck();
-  //   expect(bruteForceAnalyzer.compareSnowflakes(snowflakes)).toBe(true);
-  // });
+    expect(bruteForceAnalyzer.compareSnowflakes(snowflakes)).toBe(false);
+
+    snowflakes.splice(2, 0, fixtures.linear.trueDuplicates[2]);
+    expect(bruteForceAnalyzer.compareSnowflakes(snowflakes)).toBe(true);
+  });
 
   // makeSnowflake(i => (-i-1) + Snowflake.numPoints), // reverse
 });
 
-describe("fixtures-based tests", () => {
+describe("fixtures-based analzer tests", () => {
   const bruteForceAnalyzer = new BruteForceDuplicationCheck();
 
   test("base linearPoints sanity", () => {

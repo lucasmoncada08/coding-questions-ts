@@ -5,6 +5,7 @@ import { Snowflake, SixNumbers } from "./snowflake";
 // }
 
 export class BruteForceDuplicationCheck {
+  @LogInputs
   compareSnowflakes(snowflake: Snowflake[]) {
     for (let i = 0; i < snowflake.length - 1; i++) {
       for (let j = i + 1; j < snowflake.length; j++) {
@@ -24,6 +25,7 @@ export class BruteForceDuplicationCheck {
     return false;
   }
 
+  @LogInputs
   compareSnowflakePoints(
     sfPoints1: SixNumbers,
     sfPoints2: SixNumbers,
@@ -71,11 +73,40 @@ export function LogInputs<This, A extends unknown[], R>(
   }
 
   return function (this: This, ...args: A): R {
+    const name = String(context.name);
     try {
-      console.log(`Calling ${String(context.name)} with arguments:`, ...args);
+      console.log(`Calling ${name} with arguments:`, ...args);
     } catch {
-      console.log(`Calling ${String(context.name)} with <unprintable args>`);
+      console.log(`Calling ${name} with <unprintable args>`);
     }
-    return original.apply(this, args);
+
+    // Narrow Promise-like without using `any`.
+    const isPromiseLike = (
+      value: unknown,
+    ): value is PromiseLike<unknown> =>
+      typeof (value as { then?: unknown }).then === "function";
+
+    try {
+      const result = original.apply(this, args);
+      if (isPromiseLike(result)) {
+        return result.then(
+          (value) => {
+            console.log(`Finished ${name}`);
+            return value;
+          },
+          (err) => {
+            console.log(`Finished ${name} with error`);
+            throw err;
+          },
+        ) as unknown as R;
+      }
+      // For sync methods: log after successful execution.
+      console.log(`Finished ${name}`);
+      return result;
+    } catch (error) {
+      // For sync errors: log before rethrowing.
+      console.log(`Finished ${name} with error`);
+      throw error;
+    }
   };
 }
