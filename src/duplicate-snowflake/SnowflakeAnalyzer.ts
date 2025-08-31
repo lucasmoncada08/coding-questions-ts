@@ -38,7 +38,7 @@ export class BruteForceDuplicationCheck {
 
   getPointsAfterOffset(snowflake: Snowflake, offset: number): SixNumbers {
     return [
-      ...snowflake.points.slice(offset, Snowflake.numPoints),
+      ...snowflake.points.slice(offset, Snowflake.POINTS_PER_SNOWFLAKE),
       ...snowflake.points.slice(0, offset),
     ] as SixNumbers;
   }
@@ -48,7 +48,7 @@ export class BruteForceDuplicationCheck {
     sf2: Snowflake,
     startOffset: number,
   ): boolean {
-    for (let i = startOffset; i < Snowflake.numPoints; i++) {
+    for (let i = startOffset; i < Snowflake.POINTS_PER_SNOWFLAKE; i++) {
       const offsetSf1 = this.getPointsAfterOffset(sf1, i);
       const duplicateFound = this.compareSnowflakePoints(offsetSf1, sf2.points);
       if (duplicateFound) return true;

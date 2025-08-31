@@ -1,7 +1,8 @@
 export type SixNumbers = [number, number, number, number, number, number];
+
 export class Snowflake {
   readonly points: SixNumbers;
-  static numPoints: number = 6;
+  static readonly POINTS_PER_SNOWFLAKE: number = 6;
 
   constructor(points: SixNumbers) {
     this.points = points;
