@@ -2,7 +2,7 @@ import { Snowflake, SixNumbers } from "../snowflake";
 
 export const linearPoints: SixNumbers = [0, 1, 2, 3, 4, 5];
 
-export function rotatePoints(points: SixNumbers, shift: number): SixNumbers {
+export function rotatePointsLeft(points: SixNumbers, shift: number): SixNumbers {
   const n = points.length;
   const s = ((shift % n) + n) % n; // normalize to 0..n-1
   return [...points.slice(s, n), ...points.slice(0, s)] as SixNumbers;
@@ -30,16 +30,16 @@ export const fixtures = {
     base: make(linearPoints),
 
     trueDuplicatesPoints: [
-      rotatePoints(linearPoints, 1),
-      rotatePoints(linearPoints, 3),
+      rotatePointsLeft(linearPoints, 1),
+      rotatePointsLeft(linearPoints, 3),
       flipPoints(linearPoints),
-      rotatePoints(flipPoints(linearPoints), 2),
+      rotatePointsLeft(flipPoints(linearPoints), 2),
     ] as SixNumbers[],
 
     falseDuplicatesPoints: [
       tweak(linearPoints, 0, +1),
-      tweak(rotatePoints(linearPoints, 2), 4, +1),
-      [1, 1, 2, 3, 4, 5] as SixNumbers,
+      tweak(rotatePointsLeft(linearPoints, 2), 2, +1),
+      tweak(flipPoints(linearPoints), 1, -2),
     ],
 
     get trueDuplicates(): Snowflake[] {

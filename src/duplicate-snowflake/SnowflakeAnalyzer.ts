@@ -1,11 +1,11 @@
 import { Snowflake, SixNumbers } from "./snowflake";
 
-// export interface SnowflakeDuplicateStrategy {
-//     compareSnowflakePoints(snowflakes: Snowflake[]): boolean;
-// }
+export interface SnowflakeDuplicateStrategy {
+    compareSnowflakes(snowflakes: Snowflake[]): boolean;
+}
 
-export class BruteForceDuplicationCheck {
-  @LogInputs
+export class BruteForceDuplicationCheck implements SnowflakeDuplicateStrategy {
+  
   compareSnowflakes(snowflake: Snowflake[]) {
     for (let i = 0; i < snowflake.length - 1; i++) {
       for (let j = i + 1; j < snowflake.length; j++) {
@@ -25,7 +25,7 @@ export class BruteForceDuplicationCheck {
     return false;
   }
 
-  @LogInputs
+  
   compareSnowflakePoints(
     sfPoints1: SixNumbers,
     sfPoints2: SixNumbers,
