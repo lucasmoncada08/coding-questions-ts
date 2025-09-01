@@ -1,7 +1,7 @@
 import { Snowflake, SixNumbers } from "./snowflake";
 
 export interface SnowflakeDuplicateStrategy {
-    compareSnowflakes(snowflakes: Snowflake[]): boolean;
+  compareSnowflakes(snowflakes: Snowflake[]): boolean;
 }
 
 export class BruteForceDuplicationCheck implements SnowflakeDuplicateStrategy {
@@ -61,6 +61,20 @@ export class BruteForceDuplicationCheck implements SnowflakeDuplicateStrategy {
   findDuplicatePointsFlipped(sf1: Snowflake, sf2: Snowflake) {
     const reversedSf1 = new Snowflake([...sf1.points].reverse() as SixNumbers);
     return this.findDuplicatePointsWithOffset(reversedSf1, sf2, 0);
+  }
+}
+
+export class HashMapDuplicationCheck implements SnowflakeDuplicateStrategy {
+  getSnowflakeHash(snowflake: Snowflake): number {
+    return this.getSumOfPoints(snowflake.points);
+  }
+
+  private getSumOfPoints(snowflakePoints: SixNumbers): number {
+    let sum = 0;
+    for (const point of snowflakePoints) {
+      sum += point;
+    }
+    return sum;
   }
 }
 

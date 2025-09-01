@@ -27,7 +27,7 @@ const make = (p: SixNumbers) => new Snowflake(p);
 export const fixtures = {
   linear: {
     basePoints: linearPoints,
-    base: make(linearPoints),
+    baseSnowflake: make(linearPoints),
 
     trueDuplicatesPoints: [
       rotatePointsLeft(linearPoints, 1),
@@ -49,7 +49,7 @@ export const fixtures = {
       return this.falseDuplicatesPoints.map(make);
     },
     get all(): Snowflake[] {
-      return [this.base, ...this.trueDuplicates, ...this.falseDuplicates];
+      return [this.baseSnowflake, ...this.trueDuplicates, ...this.falseDuplicates];
     },
   },
 } as const;

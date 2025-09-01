@@ -1,13 +1,14 @@
 import { describe, test, expect } from "vitest";
 import { Snowflake, SixNumbers } from "./snowflake";
 import { SnowflakeCollection } from "./SnowflakeCollection";
-import { BruteForceDuplicationCheck } from "./SnowflakeAnalyzer";
+import { BruteForceDuplicationCheck, HashMapDuplicationCheck } from "./SnowflakeAnalyzer";
 import {
   fixtures,
   rotatePointsLeft,
   flipPoints,
   linearPoints,
 } from "./__fixtures__/snowflakes";
+import { SnowflakeLinkedListNode } from "./SnowflakeLinkedList";
 
 // Derive size from an instance to avoid static coupling
 const BASE_SNOWFLAKE = new Snowflake(linearPoints);
@@ -43,7 +44,7 @@ describe("Snowflake basics", () => {
   });
 });
 
-describe("snowflake analyzer testing", () => {
+describe("snowflake brute force analyzer testing", () => {
   const bruteForceAnalyzer = new BruteForceDuplicationCheck();
   
   test("check 2 duplicate snowflake types in-place", () => {
@@ -162,7 +163,7 @@ describe("snowflake analyzer testing", () => {
   test("compare 5 snowflakes together", () => {
     
     const snowflakes: Snowflake[] = [
-      fixtures.linear.base,
+      fixtures.linear.baseSnowflake,
       ...fixtures.linear.falseDuplicates,
     ];
 
@@ -173,6 +174,39 @@ describe("snowflake analyzer testing", () => {
   });
 });
 
+describe.only("hashmap duplicate identifier strategy", () => {
+  test("test basic linked list functionality", () => {
+    const snowflake = fixtures.linear.baseSnowflake;
+    const snowflakeLinkedListNode = new SnowflakeLinkedListNode(snowflake);
+    expect(snowflakeLinkedListNode.snowflake).toBe(snowflake);
+    expect(snowflakeLinkedListNode).toHaveProperty("nextSnowflake");
+  })
+
+  const hashMapSumDuplicationAnalyzer = new HashMapDuplicationCheck();
+
+  test("store a snowflake in a hashmap based on sum", () => {
+    const snowflakeMap = new Map();
+    
+    const snowflake = fixtures.linear.baseSnowflake;
+    const snowflakeHash = hashMapSumDuplicationAnalyzer.getSnowflakeHash(snowflake);
+
+    const snowflakeLinkedListNode = new SnowflakeLinkedListNode(snowflake);
+
+    snowflakeMap.set(snowflakeHash, snowflakeLinkedListNode);
+
+    expect(snowflakeMap.get(snowflakeHash)).toBe(snowflakeLinkedListNode);
+  });
+
+  test("sum points on the snowflake as the hash", () => {
+    const snowflake = fixtures.linear.baseSnowflake;
+
+    const sumHash = hashMapSumDuplicationAnalyzer.getSnowflakeHash(snowflake);
+
+    const sumOfLinearSnowflake = 15;
+    expect(sumHash).toBe(sumOfLinearSnowflake);
+  })
+})
+
 describe("fixtures-based analyzer tests", () => {
   const bruteForceAnalyzer = new BruteForceDuplicationCheck();
 
@@ -181,14 +215,14 @@ describe("fixtures-based analyzer tests", () => {
   });
 
   test("true duplicates are detected", () => {
-    const base = fixtures.linear.base;
+    const base = fixtures.linear.baseSnowflake;
     for (const dup of fixtures.linear.trueDuplicates) {
       expect(bruteForceAnalyzer.compareSnowflakes([base, dup])).toBe(true);
     }
   });
 
   test("false duplicates are not detected", () => {
-    const base = fixtures.linear.base;
+    const base = fixtures.linear.baseSnowflake;
     for (const notDup of fixtures.linear.falseDuplicates) {
       expect(bruteForceAnalyzer.compareSnowflakes([base, notDup])).toBe(false);
     }
