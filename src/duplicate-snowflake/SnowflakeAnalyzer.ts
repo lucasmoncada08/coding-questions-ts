@@ -1,11 +1,11 @@
 import { Snowflake, SixNumbers } from "./snowflake";
+import { SnowflakeLinkedListNode } from "./SnowflakeLinkedList";
 
 export interface SnowflakeDuplicateStrategy {
   compareSnowflakes(snowflakes: Snowflake[]): boolean;
 }
 
 export class BruteForceDuplicationCheck implements SnowflakeDuplicateStrategy {
-  
   compareSnowflakes(snowflake: Snowflake[]) {
     for (let i = 0; i < snowflake.length - 1; i++) {
       for (let j = i + 1; j < snowflake.length; j++) {
@@ -25,7 +25,6 @@ export class BruteForceDuplicationCheck implements SnowflakeDuplicateStrategy {
     return false;
   }
 
-  
   compareSnowflakePoints(
     sfPoints1: SixNumbers,
     sfPoints2: SixNumbers,
@@ -65,8 +64,22 @@ export class BruteForceDuplicationCheck implements SnowflakeDuplicateStrategy {
 }
 
 export class HashMapDuplicationCheck implements SnowflakeDuplicateStrategy {
+  snowflakeMap = new Map();
+
   getSnowflakeHash(snowflake: Snowflake): number {
     return this.getSumOfPoints(snowflake.points);
+  }
+
+  trackSnowflakeHash(snowflake: Snowflake): number {
+    const snowflakeHash: number = this.getSnowflakeHash(snowflake);
+    const snowflakeLinkedListNode = new SnowflakeLinkedListNode(snowflake);
+    const hashLLHead = this.snowflakeMap.get(snowflakeHash);
+    console.log({ hashLLHead });
+    if (hashLLHead) {
+      snowflakeLinkedListNode.nextSnowflakeNode = hashLLHead;
+    }
+    this.snowflakeMap.set(snowflakeHash, snowflakeLinkedListNode);
+    return snowflakeHash;
   }
 
   private getSumOfPoints(snowflakePoints: SixNumbers): number {
@@ -75,6 +88,17 @@ export class HashMapDuplicationCheck implements SnowflakeDuplicateStrategy {
       sum += point;
     }
     return sum;
+  }
+
+  retrieveSnowflakeNode(snowflake: Snowflake): SnowflakeLinkedListNode {
+    return this.snowflakeMap.get(this.getSnowflakeHash(snowflake));
+  }
+
+  compareSnowflakes(snowflakes: Snowflake[]): boolean {
+    // for (const snowflakeNode of this.snowflakeMap) {
+    //   const currentSnowflake = snowflakeNode.
+    // }
+    return false;
   }
 }
 
@@ -95,9 +119,7 @@ export function LogInputs<This, A extends unknown[], R>(
     }
 
     // Narrow Promise-like without using `any`.
-    const isPromiseLike = (
-      value: unknown,
-    ): value is PromiseLike<unknown> =>
+    const isPromiseLike = (value: unknown): value is PromiseLike<unknown> =>
       typeof (value as { then?: unknown }).then === "function";
 
     try {

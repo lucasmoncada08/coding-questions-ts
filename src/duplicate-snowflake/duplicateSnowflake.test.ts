@@ -1,12 +1,17 @@
 import { describe, test, expect } from "vitest";
 import { Snowflake, SixNumbers } from "./snowflake";
 import { SnowflakeCollection } from "./SnowflakeCollection";
-import { BruteForceDuplicationCheck, HashMapDuplicationCheck } from "./SnowflakeAnalyzer";
+import {
+  BruteForceDuplicationCheck,
+  HashMapDuplicationCheck,
+} from "./SnowflakeAnalyzer";
 import {
   fixtures,
   rotatePointsLeft,
   flipPoints,
   linearPoints,
+  tweak,
+  swapPoints,
 } from "./__fixtures__/snowflakes";
 import { SnowflakeLinkedListNode } from "./SnowflakeLinkedList";
 
@@ -46,7 +51,7 @@ describe("Snowflake basics", () => {
 
 describe("snowflake brute force analyzer testing", () => {
   const bruteForceAnalyzer = new BruteForceDuplicationCheck();
-  
+
   test("check 2 duplicate snowflake types in-place", () => {
     const pointsOriginal: SixNumbers = [3, 4, 1, 8, 4, 3];
     const pointsDifferent: SixNumbers = [3, 4, 1, 2, 4, 3];
@@ -140,7 +145,7 @@ describe("snowflake brute force analyzer testing", () => {
       ),
     ).toEqual(true);
   });
-  
+
   test("comparing 2 duplicate snowflakes together", () => {
     const snowflakes: Snowflake[] = [
       makeSnowflake((i) => i),
@@ -161,7 +166,6 @@ describe("snowflake brute force analyzer testing", () => {
   });
 
   test("compare 5 snowflakes together", () => {
-    
     const snowflakes: Snowflake[] = [
       fixtures.linear.baseSnowflake,
       ...fixtures.linear.falseDuplicates,
@@ -174,27 +178,38 @@ describe("snowflake brute force analyzer testing", () => {
   });
 });
 
-describe.only("hashmap duplicate identifier strategy", () => {
+describe("hashmap duplicate identifier strategy", () => {
   test("test basic linked list functionality", () => {
     const snowflake = fixtures.linear.baseSnowflake;
     const snowflakeLinkedListNode = new SnowflakeLinkedListNode(snowflake);
     expect(snowflakeLinkedListNode.snowflake).toBe(snowflake);
-    expect(snowflakeLinkedListNode).toHaveProperty("nextSnowflake");
-  })
+    expect(snowflakeLinkedListNode).toHaveProperty("nextSnowflakeNode");
+  });
 
   const hashMapSumDuplicationAnalyzer = new HashMapDuplicationCheck();
 
   test("store a snowflake in a hashmap based on sum", () => {
-    const snowflakeMap = new Map();
-    
     const snowflake = fixtures.linear.baseSnowflake;
-    const snowflakeHash = hashMapSumDuplicationAnalyzer.getSnowflakeHash(snowflake);
+    hashMapSumDuplicationAnalyzer.trackSnowflakeHash(snowflake);
 
-    const snowflakeLinkedListNode = new SnowflakeLinkedListNode(snowflake);
+    hashMapSumDuplicationAnalyzer.trackSnowflakeHash(snowflake);
 
-    snowflakeMap.set(snowflakeHash, snowflakeLinkedListNode);
+    expect(
+      hashMapSumDuplicationAnalyzer.retrieveSnowflakeNode(snowflake).snowflake,
+    ).toBe(snowflake);
+  });
 
-    expect(snowflakeMap.get(snowflakeHash)).toBe(snowflakeLinkedListNode);
+  test("handle a collision of the hashmap", () => {
+    const snowflake = fixtures.linear.baseSnowflake;
+    hashMapSumDuplicationAnalyzer.trackSnowflakeHash(snowflake);
+
+    const snowflakeSameSum = fixtures.linear.falseDuplicatesByName.sameSum;
+    hashMapSumDuplicationAnalyzer.trackSnowflakeHash(snowflakeSameSum);
+
+    const retrievedSnowflakeNode =
+      hashMapSumDuplicationAnalyzer.retrieveSnowflakeNode(snowflake);
+    expect(retrievedSnowflakeNode.snowflake).toBe(snowflakeSameSum);
+    expect(retrievedSnowflakeNode.nextSnowflakeNode?.snowflake).toBe(snowflake);
   });
 
   test("sum points on the snowflake as the hash", () => {
@@ -204,8 +219,8 @@ describe.only("hashmap duplicate identifier strategy", () => {
 
     const sumOfLinearSnowflake = 15;
     expect(sumHash).toBe(sumOfLinearSnowflake);
-  })
-})
+  });
+});
 
 describe("fixtures-based analyzer tests", () => {
   const bruteForceAnalyzer = new BruteForceDuplicationCheck();
@@ -228,8 +243,14 @@ describe("fixtures-based analyzer tests", () => {
     }
   });
 
-  test("helpers work: rotate/flip", () => {
+  test("helpers work: rotate/flip/tweak/swapPoints", () => {
     expect(rotatePointsLeft(linearPoints, 1)).toEqual([1, 2, 3, 4, 5, 0]);
     expect(flipPoints(linearPoints)).toEqual([5, 4, 3, 2, 1, 0]);
+    expect(tweak(linearPoints, 0, +1)).toEqual([1, ...linearPoints.slice(1)]);
+    expect(swapPoints(linearPoints, 0, 1)).toEqual([
+      1,
+      0,
+      ...linearPoints.slice(2),
+    ]);
   });
 });

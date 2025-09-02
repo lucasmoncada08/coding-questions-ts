@@ -1,4 +1,5 @@
 export type SixNumbers = [number, number, number, number, number, number];
+export type PointsIndex = 0 | 1 | 2 | 3 | 4 | 5;
 
 export class Snowflake {
   readonly points: SixNumbers;
