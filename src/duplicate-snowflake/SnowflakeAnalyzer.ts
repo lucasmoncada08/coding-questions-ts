@@ -71,16 +71,19 @@ export class BruteForceDuplicationCheck extends GenericDuplicateStrategy {
 
 export class HashMapDuplicationCheck extends GenericDuplicateStrategy {
   snowflakeMap: Map<number, SnowflakeLinkedListNode> = new Map();
+  duplicateHashesFound: Set<number> = new Set();
 
   getSnowflakeHash(snowflake: Snowflake): number {
     return this.getSumOfPoints(snowflake.points);
   }
 
-  trackSnowflakeHash(snowflake: Snowflake): number {
+  trackSnowflakeHash(snowflake: Snowflake, trackSameHashes: boolean): number {
     const snowflakeHash: number = this.getSnowflakeHash(snowflake);
     const snowflakeLinkedListNode = new SnowflakeLinkedListNode(snowflake);
     const hashLLHead = this.snowflakeMap.get(snowflakeHash);
     if (hashLLHead) {
+      if (trackSameHashes)
+        this.duplicateHashesFound.add(snowflakeHash);
       snowflakeLinkedListNode.nextSnowflakeNode = hashLLHead;
     }
     this.snowflakeMap.set(snowflakeHash, snowflakeLinkedListNode);
@@ -99,22 +102,47 @@ export class HashMapDuplicationCheck extends GenericDuplicateStrategy {
     return this.snowflakeMap.get(this.getSnowflakeHash(snowflake)) || null;
   }
 
-  findAnyDuplicateSnowflakes(snowflakes: Snowflake[]): boolean {
+  findAnyDuplicateSnowflakes(snowflakes: Snowflake[], trackSameHashes: boolean=true): boolean {
     for (const sf of snowflakes) {
-      this.trackSnowflakeHash(sf);
+      this.trackSnowflakeHash(sf, trackSameHashes);
     }
-    for (const snowflakeNode of this.snowflakeMap.values()) {
-      let nextNodeToCompare = snowflakeNode.nextSnowflakeNode;
-      while (nextNodeToCompare) {
-        if (
-          this.findDuplicateSnowflakesInAllConfigurations(
-            snowflakeNode.snowflake,
-            nextNodeToCompare.snowflake,
-          )
+    return this.hasDuplicatesInSnowflakeMap();
+  }
+
+  hasDuplicatesInSnowflakeMap(useSameHashes: boolean): boolean {
+    if (useSameHashes)
+      return this.checkMultiHashEntriesOnly();
+    else
+      return this.checkAllEntriesInSnowflakeMap()
+  }
+
+  checkMultiHashEntriesOnly(): boolean {
+    for (const hashWithDuplicateSFs of this.duplicateHashesFound.keys()) {
+     if (this.foundDuplicateSnowflakeInLinkedList(this.snowflakeMap.get(hashWithDuplicateSFs)!))
+      return true;
+    }
+    return false;
+  }
+
+  foundDuplicateSnowflakeInLinkedList(snowflakeNode: SnowflakeLinkedListNode): boolean {
+    let nextNodeToCompare = snowflakeNode.nextSnowflakeNode;
+    while (nextNodeToCompare) {
+      if (
+        this.findDuplicateSnowflakesInAllConfigurations(
+          snowflakeNode.snowflake,
+          nextNodeToCompare.snowflake,
         )
-          return true;
-        nextNodeToCompare = nextNodeToCompare.nextSnowflakeNode;
-      }
+      )
+        return true;
+      nextNodeToCompare = nextNodeToCompare.nextSnowflakeNode;
+    }
+    return false;
+  }
+
+  checkAllEntriesInSnowflakeMap(): boolean {
+    for (const snowflakeNode of this.snowflakeMap.values()) {
+      if (this.foundDuplicateSnowflakeInLinkedList(snowflakeNode))
+        return true;
     }
     return false;
   }
