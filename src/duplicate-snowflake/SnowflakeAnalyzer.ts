@@ -2,28 +2,13 @@ import { Snowflake, SixNumbers } from "./snowflake";
 import { SnowflakeLinkedListNode } from "./SnowflakeLinkedList";
 
 export interface SnowflakeDuplicateStrategy {
-  compareSnowflakes(snowflakes: Snowflake[]): boolean;
+  findAnyDuplicateSnowflakes(snowflakes: Snowflake[]): boolean;
 }
 
-export class BruteForceDuplicationCheck implements SnowflakeDuplicateStrategy {
-  compareSnowflakes(snowflake: Snowflake[]) {
-    for (let i = 0; i < snowflake.length - 1; i++) {
-      for (let j = i + 1; j < snowflake.length; j++) {
-        if (
-          this.compareSnowflakePoints(snowflake[i].points, snowflake[j].points)
-        ) {
-          return true;
-        }
-        if (this.findDuplicatePointsWithOffset(snowflake[i], snowflake[j], 1)) {
-          return true;
-        }
-        if (this.findDuplicatePointsFlipped(snowflake[i], snowflake[j])) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
+export abstract class GenericDuplicateStrategy
+  implements SnowflakeDuplicateStrategy
+{
+  abstract findAnyDuplicateSnowflakes(snowflakes: Snowflake[]): boolean;
 
   compareSnowflakePoints(
     sfPoints1: SixNumbers,
@@ -63,8 +48,29 @@ export class BruteForceDuplicationCheck implements SnowflakeDuplicateStrategy {
   }
 }
 
-export class HashMapDuplicationCheck implements SnowflakeDuplicateStrategy {
-  snowflakeMap = new Map();
+export class BruteForceDuplicationCheck extends GenericDuplicateStrategy {
+  findAnyDuplicateSnowflakes(snowflake: Snowflake[]) {
+    for (let i = 0; i < snowflake.length - 1; i++) {
+      for (let j = i + 1; j < snowflake.length; j++) {
+        if (
+          this.compareSnowflakePoints(snowflake[i].points, snowflake[j].points)
+        ) {
+          return true;
+        }
+        if (this.findDuplicatePointsWithOffset(snowflake[i], snowflake[j], 1)) {
+          return true;
+        }
+        if (this.findDuplicatePointsFlipped(snowflake[i], snowflake[j])) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+}
+
+export class HashMapDuplicationCheck extends GenericDuplicateStrategy {
+  snowflakeMap: Map<number, SnowflakeLinkedListNode> = new Map();
 
   getSnowflakeHash(snowflake: Snowflake): number {
     return this.getSumOfPoints(snowflake.points);
@@ -74,7 +80,6 @@ export class HashMapDuplicationCheck implements SnowflakeDuplicateStrategy {
     const snowflakeHash: number = this.getSnowflakeHash(snowflake);
     const snowflakeLinkedListNode = new SnowflakeLinkedListNode(snowflake);
     const hashLLHead = this.snowflakeMap.get(snowflakeHash);
-    console.log({ hashLLHead });
     if (hashLLHead) {
       snowflakeLinkedListNode.nextSnowflakeNode = hashLLHead;
     }
@@ -90,15 +95,40 @@ export class HashMapDuplicationCheck implements SnowflakeDuplicateStrategy {
     return sum;
   }
 
-  retrieveSnowflakeNode(snowflake: Snowflake): SnowflakeLinkedListNode {
-    return this.snowflakeMap.get(this.getSnowflakeHash(snowflake));
+  retrieveSnowflakeNode(snowflake: Snowflake): SnowflakeLinkedListNode | null {
+    return this.snowflakeMap.get(this.getSnowflakeHash(snowflake)) || null;
   }
 
-  compareSnowflakes(snowflakes: Snowflake[]): boolean {
-    // for (const snowflakeNode of this.snowflakeMap) {
-    //   const currentSnowflake = snowflakeNode.
-    // }
+  findAnyDuplicateSnowflakes(): boolean {
+    for (const snowflakeNode of this.snowflakeMap.values()) {
+      let nextNodeToCompare = snowflakeNode.nextSnowflakeNode;
+      while (nextNodeToCompare) {
+        if (
+          this.findDuplicateSnowflakesInAllConfigurations(
+            snowflakeNode.snowflake,
+            nextNodeToCompare.snowflake,
+          )
+        )
+          return true;
+        nextNodeToCompare = nextNodeToCompare.nextSnowflakeNode;
+      }
+    }
     return false;
+  }
+
+  findDuplicateSnowflakesInAllConfigurations(
+    snowflakeOne: Snowflake,
+    snowflakeTwo: Snowflake,
+  ) {
+    if (this.compareSnowflakePoints(snowflakeOne.points, snowflakeTwo.points)) {
+      return true;
+    }
+    if (this.findDuplicatePointsWithOffset(snowflakeOne, snowflakeTwo, 1)) {
+      return true;
+    }
+    if (this.findDuplicatePointsFlipped(snowflakeOne, snowflakeTwo)) {
+      return true;
+    }
   }
 }
 

@@ -151,7 +151,9 @@ describe("snowflake brute force analyzer testing", () => {
       makeSnowflake((i) => i),
       makeSnowflake((i) => (i + 1) % N), // shifted
     ];
-    expect(bruteForceAnalyzer.compareSnowflakes(snowflakes)).toBe(true);
+    expect(bruteForceAnalyzer.findAnyDuplicateSnowflakes(snowflakes)).toBe(
+      true,
+    );
   });
 
   test("comparing 3 duplicate snowflakes together", () => {
@@ -159,10 +161,14 @@ describe("snowflake brute force analyzer testing", () => {
       makeSnowflake((i) => i),
       makeSnowflake((i) => i % 4),
     ];
-    expect(bruteForceAnalyzer.compareSnowflakes(snowflakes)).toBe(false);
+    expect(bruteForceAnalyzer.findAnyDuplicateSnowflakes(snowflakes)).toBe(
+      false,
+    );
 
     snowflakes.push(makeSnowflake((i) => (i + 3) % N)); // shifted
-    expect(bruteForceAnalyzer.compareSnowflakes(snowflakes)).toBe(true);
+    expect(bruteForceAnalyzer.findAnyDuplicateSnowflakes(snowflakes)).toBe(
+      true,
+    );
   });
 
   test("compare 5 snowflakes together", () => {
@@ -171,10 +177,14 @@ describe("snowflake brute force analyzer testing", () => {
       ...fixtures.linear.falseDuplicates,
     ];
 
-    expect(bruteForceAnalyzer.compareSnowflakes(snowflakes)).toBe(false);
+    expect(bruteForceAnalyzer.findAnyDuplicateSnowflakes(snowflakes)).toBe(
+      false,
+    );
 
     snowflakes.splice(2, 0, fixtures.linear.trueDuplicates[2]);
-    expect(bruteForceAnalyzer.compareSnowflakes(snowflakes)).toBe(true);
+    expect(bruteForceAnalyzer.findAnyDuplicateSnowflakes(snowflakes)).toBe(
+      true,
+    );
   });
 });
 
@@ -186,20 +196,20 @@ describe("hashmap duplicate identifier strategy", () => {
     expect(snowflakeLinkedListNode).toHaveProperty("nextSnowflakeNode");
   });
 
-  const hashMapSumDuplicationAnalyzer = new HashMapDuplicationCheck();
-
   test("store a snowflake in a hashmap based on sum", () => {
+    const hashMapSumDuplicationAnalyzer = new HashMapDuplicationCheck();
     const snowflake = fixtures.linear.baseSnowflake;
     hashMapSumDuplicationAnalyzer.trackSnowflakeHash(snowflake);
 
     hashMapSumDuplicationAnalyzer.trackSnowflakeHash(snowflake);
 
     expect(
-      hashMapSumDuplicationAnalyzer.retrieveSnowflakeNode(snowflake).snowflake,
+      hashMapSumDuplicationAnalyzer.retrieveSnowflakeNode(snowflake)?.snowflake,
     ).toBe(snowflake);
   });
 
   test("handle a collision of the hashmap", () => {
+    const hashMapSumDuplicationAnalyzer = new HashMapDuplicationCheck();
     const snowflake = fixtures.linear.baseSnowflake;
     hashMapSumDuplicationAnalyzer.trackSnowflakeHash(snowflake);
 
@@ -208,17 +218,46 @@ describe("hashmap duplicate identifier strategy", () => {
 
     const retrievedSnowflakeNode =
       hashMapSumDuplicationAnalyzer.retrieveSnowflakeNode(snowflake);
-    expect(retrievedSnowflakeNode.snowflake).toBe(snowflakeSameSum);
-    expect(retrievedSnowflakeNode.nextSnowflakeNode?.snowflake).toBe(snowflake);
+    expect(retrievedSnowflakeNode?.snowflake).toBe(snowflakeSameSum);
+    expect(retrievedSnowflakeNode?.nextSnowflakeNode?.snowflake).toBe(
+      snowflake,
+    );
   });
 
   test("sum points on the snowflake as the hash", () => {
+    const hashMapSumDuplicationAnalyzer = new HashMapDuplicationCheck();
     const snowflake = fixtures.linear.baseSnowflake;
 
     const sumHash = hashMapSumDuplicationAnalyzer.getSnowflakeHash(snowflake);
 
     const sumOfLinearSnowflake = 15;
     expect(sumHash).toBe(sumOfLinearSnowflake);
+  });
+
+  test("simple compare snowflakes using hashmap analyzer", () => {
+    const hashMapSumDuplicationAnalyzer = new HashMapDuplicationCheck();
+    const baseSnowflake = fixtures.linear.baseSnowflake;
+    const falseDupSnowflake =
+      fixtures.linear.falseDuplicatesByName.incrementFirst;
+
+    hashMapSumDuplicationAnalyzer.trackSnowflakeHash(baseSnowflake);
+    hashMapSumDuplicationAnalyzer.trackSnowflakeHash(falseDupSnowflake);
+
+    expect(hashMapSumDuplicationAnalyzer.findAnyDuplicateSnowflakes()).toBe(
+      false,
+    );
+
+    const sameSumSnowflake = fixtures.linear.falseDuplicatesByName.sameSum;
+    hashMapSumDuplicationAnalyzer.trackSnowflakeHash(sameSumSnowflake);
+    expect(hashMapSumDuplicationAnalyzer.findAnyDuplicateSnowflakes()).toBe(
+      false,
+    );
+
+    const duplicateSnowflake = fixtures.linear.trueDuplicates[0];
+    hashMapSumDuplicationAnalyzer.trackSnowflakeHash(duplicateSnowflake);
+    expect(hashMapSumDuplicationAnalyzer.findAnyDuplicateSnowflakes()).toBe(
+      true,
+    );
   });
 });
 
@@ -232,14 +271,18 @@ describe("fixtures-based analyzer tests", () => {
   test("true duplicates are detected", () => {
     const base = fixtures.linear.baseSnowflake;
     for (const dup of fixtures.linear.trueDuplicates) {
-      expect(bruteForceAnalyzer.compareSnowflakes([base, dup])).toBe(true);
+      expect(bruteForceAnalyzer.findAnyDuplicateSnowflakes([base, dup])).toBe(
+        true,
+      );
     }
   });
 
   test("false duplicates are not detected", () => {
     const base = fixtures.linear.baseSnowflake;
     for (const notDup of fixtures.linear.falseDuplicates) {
-      expect(bruteForceAnalyzer.compareSnowflakes([base, notDup])).toBe(false);
+      expect(
+        bruteForceAnalyzer.findAnyDuplicateSnowflakes([base, notDup]),
+      ).toBe(false);
     }
   });
 

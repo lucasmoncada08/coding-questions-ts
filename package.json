@@ -7,7 +7,8 @@
     "build": "tsc",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "format": "prettier --write 'src/**/*.{ts,js,json,md}'",
-    "coverage": "vitest run --coverage --reporter=html"
+    "coverage": "vitest run --coverage --reporter=html",
+    "bench": "vitest bench --reporter=verbose"
   },
   "keywords": [],
   "author": "",
