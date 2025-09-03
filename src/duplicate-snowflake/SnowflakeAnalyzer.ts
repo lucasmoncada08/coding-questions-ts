@@ -99,7 +99,10 @@ export class HashMapDuplicationCheck extends GenericDuplicateStrategy {
     return this.snowflakeMap.get(this.getSnowflakeHash(snowflake)) || null;
   }
 
-  findAnyDuplicateSnowflakes(): boolean {
+  findAnyDuplicateSnowflakes(snowflakes: Snowflake[]): boolean {
+    for (const sf of snowflakes) {
+      this.trackSnowflakeHash(sf);
+    }
     for (const snowflakeNode of this.snowflakeMap.values()) {
       let nextNodeToCompare = snowflakeNode.nextSnowflakeNode;
       while (nextNodeToCompare) {
