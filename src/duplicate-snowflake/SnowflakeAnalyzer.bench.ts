@@ -60,7 +60,11 @@ for (const n of sizes) {
     bench("BruteForce", () => {
       new BruteForceDuplicationCheck().findAnyDuplicateSnowflakes(noDup);
     });
-    bench("HashMap (track+check)", () => {
+    bench("HashMap (original)", () => {
+      const a = new HashMapDuplicationCheck();
+      a.findAnyDuplicateSnowflakes(noDup, false);
+    });
+    bench("HashMap (duplicate hash only)", () => {
       const a = new HashMapDuplicationCheck();
       a.findAnyDuplicateSnowflakes(noDup);
     });
@@ -72,7 +76,11 @@ for (const n of sizes) {
     });
     bench("HashMap (track+check)", () => {
       const a = new HashMapDuplicationCheck();
-      a.findAnyDuplicateSnowflakes(rotateDup);
+      a.findAnyDuplicateSnowflakes(rotateDup, false);
+    });
+    bench("HashMap (duplicate hash only)", () => {
+      const a = new HashMapDuplicationCheck();
+      a.findAnyDuplicateSnowflakes(noDup);
     });
   });
 
@@ -82,7 +90,11 @@ for (const n of sizes) {
     });
     bench("HashMap (track+check)", () => {
       const a = new HashMapDuplicationCheck();
-      a.findAnyDuplicateSnowflakes(flipDup);
+      a.findAnyDuplicateSnowflakes(flipDup, false);
+    });
+    bench("HashMap (duplicate hash only)", () => {
+      const a = new HashMapDuplicationCheck();
+      a.findAnyDuplicateSnowflakes(noDup);
     });
   });
 }
