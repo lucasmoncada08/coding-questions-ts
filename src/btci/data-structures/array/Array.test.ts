@@ -58,6 +58,13 @@ test("fill the array up beyond the default capacity", () => {
     assert.equal(arr.length, 5);
 })
 
+test("set some indices to a given value", () => {
+    const arr = createSimpleArray();
+    arr.set(0, 5);
+    assert.equal(arr.get(0), 5);
+    assert.throws(() => arr.set(4, 10), { message: "Index 4 out of bounds"});
+})
+
 if (anyFailure) {
     console.log("Errors Found!")
 } else {

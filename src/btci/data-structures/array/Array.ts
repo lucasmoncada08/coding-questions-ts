@@ -18,16 +18,25 @@ export class MyArray<T> {
   resize(newCapacity: number): void {
     const newData: Partial<Record<number, T>> = {};
     for (let i=0; i<this._length; i++) {
-      newData[0] = this.data[i];
+      newData[i] = this.data[i];
     }
     this.data = newData;
     this._capacity = newCapacity;
   }
 
-  get(index: number): T {
+  private assertIndexInBounds(index: number) {
     if (index < 0 || index > this._length)
       throw new Error(`Index ${index} out of bounds`);
+  }
+
+  get(index: number): T {
+    this.assertIndexInBounds(index);
     return this.data[index]!;
+  }
+
+  set(index: number, value: T) {
+    this.assertIndexInBounds(index);
+    this.data[index] = value;
   }
 
   static of<T>(...initialItems: T[]): MyArray<T> {
