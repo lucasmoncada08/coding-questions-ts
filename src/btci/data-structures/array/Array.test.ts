@@ -45,6 +45,17 @@ test("get the value of a given index", () => {
     assert.equal(arr.get(0), 1);
     assert.equal(arr.get(1), 2);
     assert.equal(arr.get(2), 3);
+
+    assert.throws(() => arr.get(4), { message: "Index 4 out of bounds"});
+    assert.throws(() => arr.get(-1), { message: "Index -1 out of bounds"});
+})
+
+test("fill the array up beyond the default capacity", () => {
+    const arr = MyArray.of(1, 2, 3, 4);
+    assert.equal(arr.capacity, 4);
+    arr.push(5);
+    assert.equal(arr.capacity, 8);
+    assert.equal(arr.length, 5);
 })
 
 if (anyFailure) {

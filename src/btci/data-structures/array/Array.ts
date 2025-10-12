@@ -10,11 +10,24 @@ export class MyArray<T> {
   }
 
   push(item: T): void {
+    if (this._length === this._capacity)
+      this.resize(this._capacity * 2);
     this.data[this._length++] = item;
   }
 
-  get(index: number): T | undefined {
-    return this.data[index];
+  resize(newCapacity: number): void {
+    const newData: Partial<Record<number, T>> = {};
+    for (let i=0; i<this._length; i++) {
+      newData[0] = this.data[i];
+    }
+    this.data = newData;
+    this._capacity = newCapacity;
+  }
+
+  get(index: number): T {
+    if (index < 0 || index > this._length)
+      throw new Error(`Index ${index} out of bounds`);
+    return this.data[index]!;
   }
 
   static of<T>(...initialItems: T[]): MyArray<T> {
