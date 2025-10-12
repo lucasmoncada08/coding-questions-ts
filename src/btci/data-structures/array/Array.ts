@@ -13,6 +13,10 @@ export class MyArray<T> {
     this.data[this._length++] = item;
   }
 
+  get(index: number): T | undefined {
+    return this.data[index];
+  }
+
   static of<T>(...initialItems: T[]): MyArray<T> {
     const arr = new MyArray<T>(Math.max(DEFAULT_CAPACITY, initialItems.length))
     for (const item of initialItems) {
