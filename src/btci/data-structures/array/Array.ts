@@ -9,15 +9,18 @@ export class MyArray<T> {
     this._capacity = initialCapacity;
   }
 
-  push(item: T): void {
-    if (this._length === this._capacity)
-      this.resize(this._capacity * 2);
-    this.data[this._length++] = item;
+  push(item: T): void;
+  push(...items: T[]): void;
+  push(...items: T[]): void {
+    for (const item of items) {
+      if (this._length === this._capacity) this.resize(this._capacity * 2);
+      this.data[this._length++] = item;
+    }
   }
 
   resize(newCapacity: number): void {
     const newData: Partial<Record<number, T>> = {};
-    for (let i=0; i<this._length; i++) {
+    for (let i = 0; i < this._length; i++) {
       newData[i] = this.data[i];
     }
     this.data = newData;
@@ -40,14 +43,14 @@ export class MyArray<T> {
   }
 
   static of<T>(...initialItems: T[]): MyArray<T> {
-    const arr = new MyArray<T>(Math.max(DEFAULT_CAPACITY, initialItems.length))
+    const arr = new MyArray<T>(Math.max(DEFAULT_CAPACITY, initialItems.length));
     for (const item of initialItems) {
       arr.push(item);
     }
     return arr;
   }
 
-  get length(): number { 
+  get length(): number {
     return this._length;
   }
 

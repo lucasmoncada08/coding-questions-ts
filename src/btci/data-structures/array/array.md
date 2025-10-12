@@ -1,15 +1,18 @@
 # Hand-Built Arrays
 
 ## Why Build One Yourself?
+
 Reimplementing an array from first principles makes the trade-offs of constant-time indexing, contiguous storage, and dynamic resizing concrete. This is an exercise to tour through the invariants that the real JavaScript `Array` keeps hidden: a backing store, a `length` tracker, and guard rails that protect against out-of-bounds access.
 
 ## Core Invariants to Maintain
+
 - A contiguous storage container (object or `Record<number, T>`) that maps numeric indices to values.
 - A `length` property that always reflects the number of accessible elements.
 - Capacity and resizing rules so `push`/`unshift` remain efficient (doubling strategy works well).
 - Defensive bounds checking for any read/write operation.
 
 ## Implementation Roadmap
+
 1. **Construction & Length**: create an empty `MyArray`, confirm `length === 0`, optionally accept initial elements.
 2. **Indexed Accessors**: add `get(index)` and `set(index, value)` with bounds validation and overwriting semantics.
 3. **Tail Operations**: implement `push(...items)` and `pop()`; verify growth, shrink, and returned values.
@@ -21,6 +24,7 @@ Reimplementing an array from first principles makes the trade-offs of constant-t
 9. **Stretch Goals**: consider `reverse`, `sort` (simple algorithms first), or making the structure iterable via `[Symbol.iterator]`.
 
 ## Testing & Feedback Loop
+
 - Start every step with focused tests that capture expected behavior and edge cases (empty array, single element, invalid index).
 - After each green test run, inspect the internal state (buffer + `length`) to reinforce intuition.
 - Document insights as you go—small notes per milestone will make the full journey easier to review later.
