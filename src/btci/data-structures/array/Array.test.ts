@@ -38,6 +38,13 @@ test("push element(s) into the array", () => {
   assert.equal(arr.get(3), 4);
 });
 
+test("push elements to resize the capacity of the array", () => {
+  const arr = MyArray.of(1, 2, 3, 4);
+  assert.equal(arr.capacity, 4);
+  arr.push(5);
+  assert.equal(arr.capacity, 8);
+})
+
 test("initialize array with preset values with of", () => {
   const arr = createSimpleArray();
   assert.equal(arr.length, 3);
@@ -77,6 +84,10 @@ test('pop off some values from the array', () => {
   arr.pop();
   assert.throws(() => arr.pop(), { message: "No data to pop" });
 })
+
+// test("minimize the capacity of array after popping under threshold", () => {
+//   const arr = MyArray.of(1, 2, 3, 4, 5, 6, 7, 8);
+// })
 
 if (anyFailure) {
   console.log("Errors Found!");
