@@ -10,8 +10,7 @@ export class MyArray<T> {
     this._capacity = initialCapacity;
   }
 
-  push(item: T): void;
-  push(...items: T[]): void;
+  push(first: T, ...rest: T[]): void;
   push(...items: T[]): void {
     for (const item of items) {
       if (this._length === this._capacity) this.resize(this._capacity * 2);
