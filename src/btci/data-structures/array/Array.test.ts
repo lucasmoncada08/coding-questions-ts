@@ -68,6 +68,16 @@ test("set some indices to a given value", () => {
   assert.throws(() => arr.set(4, 10), { message: "Index 4 out of bounds" });
 });
 
+test('pop off some values from the array', () => {
+  const arr = createSimpleArray();
+  const poppedElement = arr.pop();
+  assert.equal(poppedElement, 3);
+  assert.equal(arr.length, 2);
+  arr.pop();
+  arr.pop();
+  assert.throws(() => arr.pop(), { message: "No data to pop" });
+})
+
 if (anyFailure) {
   console.log("Errors Found!");
 } else {

@@ -1,4 +1,5 @@
 const DEFAULT_CAPACITY = 4;
+const RESIZE_SMALLER_RATIO = 0.25;
 
 export class MyArray<T> {
   private data: Partial<Record<number, T>> = {};
@@ -16,6 +17,16 @@ export class MyArray<T> {
       if (this._length === this._capacity) this.resize(this._capacity * 2);
       this.data[this._length++] = item;
     }
+  }
+
+  pop(): T {
+    if (this._length === 0)
+      throw new Error("No data to pop")
+
+    const valuePopped = this.data[this._length-1];
+    delete this.data[this._length-1];
+    this._length--;
+    return valuePopped as T;
   }
 
   resize(newCapacity: number): void {
