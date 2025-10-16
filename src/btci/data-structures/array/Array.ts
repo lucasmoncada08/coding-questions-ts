@@ -22,6 +22,12 @@ export class MyArray<T> {
     if (this._length === 0)
       throw new Error("No data to pop")
 
+    if (
+      this._capacity > DEFAULT_CAPACITY &&
+      this._length <= this._capacity*RESIZE_SMALLER_RATIO
+    )
+      this.resize(this._capacity / 2)
+
     const valuePopped = this.data[this._length-1];
     delete this.data[this._length-1];
     this._length--;

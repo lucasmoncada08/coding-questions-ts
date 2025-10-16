@@ -85,9 +85,13 @@ test('pop off some values from the array', () => {
   assert.throws(() => arr.pop(), { message: "No data to pop" });
 })
 
-// test("minimize the capacity of array after popping under threshold", () => {
-//   const arr = MyArray.of(1, 2, 3, 4, 5, 6, 7, 8);
-// })
+test("minimize the capacity of array after popping under threshold", () => {
+  const arr = MyArray.of(1, 2, 3, 4, 5, 6, 7, 8);
+  assert.equal(arr.capacity, 8);
+  for (let i=0; i<=6; i++)
+    arr.pop();
+  assert.equal(arr.capacity, 4);
+})
 
 if (anyFailure) {
   console.log("Errors Found!");
