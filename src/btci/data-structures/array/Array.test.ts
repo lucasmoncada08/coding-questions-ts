@@ -93,6 +93,13 @@ test("minimize the capacity of array after popping under threshold", () => {
   assert.equal(arr.capacity, 4);
 })
 
+test("pop at a given index", () => {
+  const arr = createSimpleArray();
+  arr.remove(1);
+  assert.equal(arr.length, 2);
+  assert.equal(arr.get(1), 3);
+})
+
 if (anyFailure) {
   console.log("Errors Found!");
 } else {

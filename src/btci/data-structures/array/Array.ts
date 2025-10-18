@@ -22,16 +22,36 @@ export class MyArray<T> {
     if (this._length === 0)
       throw new Error("No data to pop")
 
-    if (
-      this._capacity > DEFAULT_CAPACITY &&
-      this._length <= this._capacity*RESIZE_SMALLER_RATIO
-    )
-      this.resize(this._capacity / 2)
+    this.checkReduceCapacity();
 
     const valuePopped = this.data[this._length-1];
     delete this.data[this._length-1];
     this._length--;
     return valuePopped as T;
+  }
+
+  remove(index: number): T {
+    if (this.length === 0)
+      throw new Error("No data to pop");
+
+    this.checkReduceCapacity();
+
+    const valuePopped = this.data[index];
+
+    for (let i=index; i<this._length; i++) {
+      this.data[i] = this.data[i+1];
+    }
+
+    this._length--;
+    return valuePopped as T;
+  }
+
+  checkReduceCapacity() {
+    if (
+      this._capacity > DEFAULT_CAPACITY &&
+      this._length <= this._capacity*RESIZE_SMALLER_RATIO
+    )
+      this.resize(this._capacity / 2)
   }
 
   resize(newCapacity: number): void {
