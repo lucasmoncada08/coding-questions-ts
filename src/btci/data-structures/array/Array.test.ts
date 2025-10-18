@@ -4,15 +4,20 @@ import { MyArray } from "./Array";
 
 let anyFailure = false;
 
+// Test framework with .only() support
+const tests: Array<{description: string, run: () => void, only: boolean}> = [];
+let hasOnlyTests = false;
+
 function test(description: string, run: () => void) {
-  try {
-    run();
-    console.log(`PASS: ${description}`);
-  } catch (error) {
-    console.error(`FAIL: ${description}`);
-    console.error({ error });
-    anyFailure = true;
-  }
+  const testObj = { description, run, only: false };
+  tests.push(testObj);
+
+  return {
+    only: () => {
+      testObj.only = true;
+      hasOnlyTests = true;
+    }
+  };
 }
 
 function createSimpleArray(): MyArray<number> {
@@ -99,6 +104,27 @@ test("pop at a given index", () => {
   assert.equal(arr.length, 2);
   assert.equal(arr.get(1), 3);
 })
+
+test("contains method to check whether an element exists in the array", () => {
+  const arr = createSimpleArray();
+  assert.equal(arr.contains(4), false);
+  assert.equal(arr.contains(1), true);
+});
+
+// Run tests
+for (const t of tests) {
+  // Skip tests if .only() tests exist and this isn't one of them
+  if (hasOnlyTests && !t.only) continue;
+
+  try {
+    t.run();
+    console.log(`PASS: ${t.description}`);
+  } catch (error) {
+    console.error(`FAIL: ${t.description}`);
+    console.error({ error });
+    anyFailure = true;
+  }
+}
 
 if (anyFailure) {
   console.log("Errors Found!");

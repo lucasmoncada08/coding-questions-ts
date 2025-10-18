@@ -68,6 +68,14 @@ export class MyArray<T> {
       throw new Error(`Index ${index} out of bounds`);
   }
 
+  contains(value: T): boolean {
+    for (const key in this.data) {
+      if (value === this.data[key])
+        return true;
+    }
+    return false;
+  }
+
   get(index: number): T {
     this.assertIndexInBounds(index);
     return this.data[index]!;
