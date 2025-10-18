@@ -13,9 +13,14 @@ export class MyArray<T> {
   push(first: T, ...rest: T[]): void;
   push(...items: T[]): void {
     for (const item of items) {
-      if (this._length === this._capacity) this.resize(this._capacity * 2);
+      this.checkIncreaseCapacity();
       this.data[this._length++] = item;
     }
+  }
+
+  checkIncreaseCapacity(): void {
+    if (this._length === this._capacity) 
+      this.resize(this._capacity * 2);
   }
 
   pop(): T {
@@ -74,6 +79,16 @@ export class MyArray<T> {
         return true;
     }
     return false;
+  }
+
+  insert(index: number, value: T) {
+    this.checkIncreaseCapacity();
+
+    for (let i=this._length; i>index; i--) {
+      this.data[i] = this.data[i-1];
+    }
+    this.data[index] = value;
+    this._length++;
   }
 
   get(index: number): T {

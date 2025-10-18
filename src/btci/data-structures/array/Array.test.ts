@@ -111,6 +111,21 @@ test("contains method to check whether an element exists in the array", () => {
   assert.equal(arr.contains(1), true);
 });
 
+test("insert an element into the array", () => {
+  const arr = createSimpleArray();
+  arr.insert(1, 9);
+  assert.equal(arr.get(1), 9);
+  assert.equal(arr.get(2), 2);
+  assert.equal(arr.length, 4);
+
+  const longerArr = MyArray.of(1, 2, 3, 4, 5, 6, 7, 8);
+  longerArr.insert(0, 0);
+  assert.equal(longerArr.get(0), 0);
+  assert.equal(longerArr.get(8), 8);
+  assert.equal(longerArr.length, 9);
+  assert.equal(longerArr.capacity, 16);
+}).only();
+
 // Run tests
 for (const t of tests) {
   // Skip tests if .only() tests exist and this isn't one of them
