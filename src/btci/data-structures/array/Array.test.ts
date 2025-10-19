@@ -4,7 +4,7 @@ import { MyArray } from "./Array";
 
 let anyFailure = false;
 
-// Test framework with .only() support
+// Test framework with  support
 const tests: Array<{description: string, run: () => void, only: boolean}> = [];
 let hasOnlyTests = false;
 
@@ -88,7 +88,7 @@ test('pop off some values from the array', () => {
   arr.pop();
   arr.pop();
   assert.throws(() => arr.pop(), { message: "No data to pop" });
-})
+});
 
 test("minimize the capacity of array after popping under threshold", () => {
   const arr = MyArray.of(1, 2, 3, 4, 5, 6, 7, 8);
@@ -96,14 +96,14 @@ test("minimize the capacity of array after popping under threshold", () => {
   for (let i=0; i<=6; i++)
     arr.pop();
   assert.equal(arr.capacity, 4);
-})
+});
 
 test("pop at a given index", () => {
   const arr = createSimpleArray();
-  arr.remove(1);
+  arr.pop(1);
   assert.equal(arr.length, 2);
   assert.equal(arr.get(1), 3);
-})
+});
 
 test("contains method to check whether an element exists in the array", () => {
   const arr = createSimpleArray();
@@ -124,11 +124,18 @@ test("insert an element into the array", () => {
   assert.equal(longerArr.get(8), 8);
   assert.equal(longerArr.length, 9);
   assert.equal(longerArr.capacity, 16);
-}).only();
+});
+
+test("remove based off value", () => {
+  const arr = createSimpleArray();
+  arr.remove(2);
+  assert.equal(arr.length, 2);
+  assert.equal(arr.get(1), 3);
+});
 
 // Run tests
 for (const t of tests) {
-  // Skip tests if .only() tests exist and this isn't one of them
+  // Skip tests if  tests exist and this isn't one of them
   if (hasOnlyTests && !t.only) continue;
 
   try {

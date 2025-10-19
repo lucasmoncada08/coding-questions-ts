@@ -23,32 +23,58 @@ export class MyArray<T> {
       this.resize(this._capacity * 2);
   }
 
-  pop(): T {
+  pop(index?: number): T {
     if (this._length === 0)
-      throw new Error("No data to pop")
-
-    this.checkReduceCapacity();
-
-    const valuePopped = this.data[this._length-1];
-    delete this.data[this._length-1];
-    this._length--;
-    return valuePopped as T;
-  }
-
-  remove(index: number): T {
-    if (this.length === 0)
       throw new Error("No data to pop");
 
     this.checkReduceCapacity();
 
-    const valuePopped = this.data[index];
+    const indexToPop = index || this._length-1;
 
-    for (let i=index; i<this._length; i++) {
+    if (indexToPop < 0 || indexToPop >= this._length)
+      throw new Error("index out of bounds");
+
+    const valuePopped = this.data[indexToPop];
+    delete this.data[indexToPop];
+
+    for (let i=indexToPop; i<this._length; i++) {
+      this.data[i] = this.data[i+1];
+    }
+    
+    this._length--;
+    return valuePopped as T;
+  }
+
+  remove(value: T): boolean {
+    if (this.length === 0)
+      throw new Error("No data to remove");
+
+    this.checkReduceCapacity();
+
+    const { foundValue, searchIndex } = this.findValueToRemove(value);
+
+    if (!foundValue)
+      return false;
+
+    for (let i=searchIndex; i<this._length; i++) {
       this.data[i] = this.data[i+1];
     }
 
     this._length--;
-    return valuePopped as T;
+    return true;
+  }
+
+  private findValueToRemove(value: T): { foundValue: boolean, searchIndex: number } {
+    let foundValue = false;
+    let searchIndex = 0;
+    while (searchIndex < this._length) {
+      if (this.data[searchIndex] === value) {
+        foundValue = true;
+        break;
+      }
+      searchIndex++;
+    }
+    return { foundValue, searchIndex }
   }
 
   checkReduceCapacity() {
