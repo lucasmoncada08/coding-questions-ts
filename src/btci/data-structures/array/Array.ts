@@ -27,29 +27,25 @@ export class MyArray<T> {
     if (this._length === 0)
       throw new Error("No data to pop");
 
-    this.checkReduceCapacity();
-
     const indexToPop = index ?? this._length-1;
 
-    if (indexToPop < 0 || indexToPop >= this._length)
-      throw new Error("index out of bounds");
+    this.assertIndexInBounds(indexToPop);
 
     const valuePopped = this.data[indexToPop];
-    delete this.data[indexToPop];
 
     for (let i=indexToPop; i<this._length; i++) {
       this.data[i] = this.data[i+1];
     }
     
+    delete this.data[this._length-1];
     this._length--;
+    this.checkReduceCapacity();
     return valuePopped as T;
   }
 
   remove(value: T): boolean {
     if (this.length === 0)
       throw new Error("No data to remove");
-
-    this.checkReduceCapacity();
 
     const { foundValue, searchIndex } = this.findValueToRemove(value);
 
@@ -60,7 +56,9 @@ export class MyArray<T> {
       this.data[i] = this.data[i+1];
     }
 
+    delete this.data[this._length-1];
     this._length--;
+    this.checkReduceCapacity();
     return true;
   }
 
@@ -95,20 +93,23 @@ export class MyArray<T> {
   }
 
   private assertIndexInBounds(index: number) {
-    if (index < 0 || index > this._length)
+    if (index < 0 || index >= this._length)
       throw new Error(`Index ${index} out of bounds`);
   }
 
   contains(value: T): boolean {
-    for (const key in this.data) {
-      if (value === this.data[key])
+    for (let i=0; i<this._length; i++) {
+      if (value === this.data[i])
         return true;
     }
     return false;
   }
 
-  insert(index: number, value: T) {
+  insert(index: number, value: T): void {
     this.checkIncreaseCapacity();
+
+    if (index < 0 || index > this._length)
+      throw new Error(`Index ${index} out of bounds`);
 
     for (let i=this._length; i>index; i--) {
       this.data[i] = this.data[i-1];
