@@ -103,6 +103,10 @@ test("pop at a given index", () => {
   arr.pop(1);
   assert.equal(arr.length, 2);
   assert.equal(arr.get(1), 3);
+
+  arr.pop(0);
+  assert.equal(arr.length, 1);
+  assert.equal(arr.get(0), 3);
 });
 
 test("contains method to check whether an element exists in the array", () => {

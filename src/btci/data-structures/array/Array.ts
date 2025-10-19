@@ -29,7 +29,7 @@ export class MyArray<T> {
 
     this.checkReduceCapacity();
 
-    const indexToPop = index || this._length-1;
+    const indexToPop = index ?? this._length-1;
 
     if (indexToPop < 0 || indexToPop >= this._length)
       throw new Error("index out of bounds");
