@@ -4,15 +4,20 @@ import { MyArray } from "./Array";
 
 let anyFailure = false;
 
+// Test framework with  support
+const tests: Array<{description: string, run: () => void, only: boolean}> = [];
+let hasOnlyTests = false;
+
 function test(description: string, run: () => void) {
-  try {
-    run();
-    console.log(`PASS: ${description}`);
-  } catch (error) {
-    console.error(`FAIL: ${description}`);
-    console.error({ error });
-    anyFailure = true;
-  }
+  const testObj = { description, run, only: false };
+  tests.push(testObj);
+
+  return {
+    only: () => {
+      testObj.only = true;
+      hasOnlyTests = true;
+    }
+  };
 }
 
 function createSimpleArray(): MyArray<number> {
@@ -37,6 +42,13 @@ test("push element(s) into the array", () => {
   assert.equal(arr.length, 4);
   assert.equal(arr.get(3), 4);
 });
+
+test("push elements to resize the capacity of the array", () => {
+  const arr = MyArray.of(1, 2, 3, 4);
+  assert.equal(arr.capacity, 4);
+  arr.push(5);
+  assert.equal(arr.capacity, 8);
+})
 
 test("initialize array with preset values with of", () => {
   const arr = createSimpleArray();
@@ -67,6 +79,78 @@ test("set some indices to a given value", () => {
   assert.equal(arr.get(0), 5);
   assert.throws(() => arr.set(4, 10), { message: "Index 4 out of bounds" });
 });
+
+test('pop off some values from the array', () => {
+  const arr = createSimpleArray();
+  const poppedElement = arr.pop();
+  assert.equal(poppedElement, 3);
+  assert.equal(arr.length, 2);
+  arr.pop();
+  arr.pop();
+  assert.throws(() => arr.pop(), { message: "No data to pop" });
+});
+
+test("minimize the capacity of array after popping under threshold", () => {
+  const arr = MyArray.of(1, 2, 3, 4, 5, 6, 7, 8);
+  assert.equal(arr.capacity, 8);
+  for (let i=0; i<=6; i++)
+    arr.pop();
+  assert.equal(arr.capacity, 4);
+});
+
+test("pop at a given index", () => {
+  const arr = createSimpleArray();
+  arr.pop(1);
+  assert.equal(arr.length, 2);
+  assert.equal(arr.get(1), 3);
+
+  arr.pop(0);
+  assert.equal(arr.length, 1);
+  assert.equal(arr.get(0), 3);
+});
+
+test("contains method to check whether an element exists in the array", () => {
+  const arr = createSimpleArray();
+  assert.equal(arr.contains(4), false);
+  assert.equal(arr.contains(1), true);
+});
+
+test("insert an element into the array", () => {
+  const arr = createSimpleArray();
+  arr.insert(1, 9);
+  assert.equal(arr.get(1), 9);
+  assert.equal(arr.get(2), 2);
+  assert.equal(arr.length, 4);
+
+  const longerArr = MyArray.of(1, 2, 3, 4, 5, 6, 7, 8);
+  longerArr.insert(0, 0);
+  assert.equal(longerArr.get(0), 0);
+  assert.equal(longerArr.get(8), 8);
+  assert.equal(longerArr.length, 9);
+  assert.equal(longerArr.capacity, 16);
+});
+
+test("remove based off value", () => {
+  const arr = createSimpleArray();
+  arr.remove(2);
+  assert.equal(arr.length, 2);
+  assert.equal(arr.get(1), 3);
+});
+
+// Run tests
+for (const t of tests) {
+  // Skip tests if  tests exist and this isn't one of them
+  if (hasOnlyTests && !t.only) continue;
+
+  try {
+    t.run();
+    console.log(`PASS: ${t.description}`);
+  } catch (error) {
+    console.error(`FAIL: ${t.description}`);
+    console.error({ error });
+    anyFailure = true;
+  }
+}
 
 if (anyFailure) {
   console.log("Errors Found!");
