@@ -82,8 +82,7 @@ export class HashMapDuplicationCheck extends GenericDuplicateStrategy {
     const snowflakeLinkedListNode = new SnowflakeLinkedListNode(snowflake);
     const hashLLHead = this.snowflakeMap.get(snowflakeHash);
     if (hashLLHead) {
-      if (trackSameHashes)
-        this.duplicateHashesFound.add(snowflakeHash);
+      if (trackSameHashes) this.duplicateHashesFound.add(snowflakeHash);
       snowflakeLinkedListNode.nextSnowflakeNode = hashLLHead;
     }
     this.snowflakeMap.set(snowflakeHash, snowflakeLinkedListNode);
@@ -102,7 +101,10 @@ export class HashMapDuplicationCheck extends GenericDuplicateStrategy {
     return this.snowflakeMap.get(this.getSnowflakeHash(snowflake)) || null;
   }
 
-  findAnyDuplicateSnowflakes(snowflakes: Snowflake[], trackSameHashes: boolean=true): boolean {
+  findAnyDuplicateSnowflakes(
+    snowflakes: Snowflake[],
+    trackSameHashes: boolean = true,
+  ): boolean {
     for (const sf of snowflakes) {
       this.trackSnowflakeHash(sf, trackSameHashes);
     }
@@ -110,21 +112,25 @@ export class HashMapDuplicationCheck extends GenericDuplicateStrategy {
   }
 
   hasDuplicatesInSnowflakeMap(useSameHashes: boolean): boolean {
-    if (useSameHashes)
-      return this.checkMultiHashEntriesOnly();
-    else
-      return this.checkAllEntriesInSnowflakeMap()
+    if (useSameHashes) return this.checkMultiHashEntriesOnly();
+    else return this.checkAllEntriesInSnowflakeMap();
   }
 
   checkMultiHashEntriesOnly(): boolean {
     for (const hashWithDuplicateSFs of this.duplicateHashesFound.keys()) {
-     if (this.foundDuplicateSnowflakeInLinkedList(this.snowflakeMap.get(hashWithDuplicateSFs)!))
-      return true;
+      if (
+        this.foundDuplicateSnowflakeInLinkedList(
+          this.snowflakeMap.get(hashWithDuplicateSFs)!,
+        )
+      )
+        return true;
     }
     return false;
   }
 
-  foundDuplicateSnowflakeInLinkedList(snowflakeNode: SnowflakeLinkedListNode): boolean {
+  foundDuplicateSnowflakeInLinkedList(
+    snowflakeNode: SnowflakeLinkedListNode,
+  ): boolean {
     let nextNodeToCompare = snowflakeNode.nextSnowflakeNode;
     while (nextNodeToCompare) {
       if (
@@ -141,8 +147,7 @@ export class HashMapDuplicationCheck extends GenericDuplicateStrategy {
 
   checkAllEntriesInSnowflakeMap(): boolean {
     for (const snowflakeNode of this.snowflakeMap.values()) {
-      if (this.foundDuplicateSnowflakeInLinkedList(snowflakeNode))
-        return true;
+      if (this.foundDuplicateSnowflakeInLinkedList(snowflakeNode)) return true;
     }
     return false;
   }
