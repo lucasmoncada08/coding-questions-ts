@@ -19,50 +19,49 @@ export class MyArray<T> {
   }
 
   checkIncreaseCapacity(): void {
-    if (this._length === this._capacity) 
-      this.resize(this._capacity * 2);
+    if (this._length === this._capacity) this.resize(this._capacity * 2);
   }
 
   pop(index?: number): T {
-    if (this._length === 0)
-      throw new Error("No data to pop");
+    if (this._length === 0) throw new Error("No data to pop");
 
-    const indexToPop = index ?? this._length-1;
+    const indexToPop = index ?? this._length - 1;
 
     this.assertIndexInBounds(indexToPop);
 
     const valuePopped = this.data[indexToPop];
 
-    for (let i=indexToPop; i<this._length; i++) {
-      this.data[i] = this.data[i+1];
+    for (let i = indexToPop; i < this._length; i++) {
+      this.data[i] = this.data[i + 1];
     }
-    
-    delete this.data[this._length-1];
+
+    delete this.data[this._length - 1];
     this._length--;
     this.checkReduceCapacity();
     return valuePopped as T;
   }
 
   remove(value: T): boolean {
-    if (this.length === 0)
-      throw new Error("No data to remove");
+    if (this.length === 0) throw new Error("No data to remove");
 
     const { foundValue, searchIndex } = this.findValueToRemove(value);
 
-    if (!foundValue)
-      return false;
+    if (!foundValue) return false;
 
-    for (let i=searchIndex; i<this._length; i++) {
-      this.data[i] = this.data[i+1];
+    for (let i = searchIndex; i < this._length; i++) {
+      this.data[i] = this.data[i + 1];
     }
 
-    delete this.data[this._length-1];
+    delete this.data[this._length - 1];
     this._length--;
     this.checkReduceCapacity();
     return true;
   }
 
-  private findValueToRemove(value: T): { foundValue: boolean, searchIndex: number } {
+  private findValueToRemove(value: T): {
+    foundValue: boolean;
+    searchIndex: number;
+  } {
     let foundValue = false;
     let searchIndex = 0;
     while (searchIndex < this._length) {
@@ -72,15 +71,15 @@ export class MyArray<T> {
       }
       searchIndex++;
     }
-    return { foundValue, searchIndex }
+    return { foundValue, searchIndex };
   }
 
   checkReduceCapacity() {
     if (
       this._capacity > DEFAULT_CAPACITY &&
-      this._length <= this._capacity*RESIZE_SMALLER_RATIO
+      this._length <= this._capacity * RESIZE_SMALLER_RATIO
     )
-      this.resize(this._capacity / 2)
+      this.resize(this._capacity / 2);
   }
 
   resize(newCapacity: number): void {
@@ -98,9 +97,8 @@ export class MyArray<T> {
   }
 
   contains(value: T): boolean {
-    for (let i=0; i<this._length; i++) {
-      if (value === this.data[i])
-        return true;
+    for (let i = 0; i < this._length; i++) {
+      if (value === this.data[i]) return true;
     }
     return false;
   }
@@ -111,8 +109,8 @@ export class MyArray<T> {
     if (index < 0 || index > this._length)
       throw new Error(`Index ${index} out of bounds`);
 
-    for (let i=this._length; i>index; i--) {
-      this.data[i] = this.data[i-1];
+    for (let i = this._length; i > index; i--) {
+      this.data[i] = this.data[i - 1];
     }
     this.data[index] = value;
     this._length++;
