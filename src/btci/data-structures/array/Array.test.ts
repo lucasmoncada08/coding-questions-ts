@@ -5,7 +5,8 @@ import { MyArray } from "./Array";
 let anyFailure = false;
 
 // Test framework with  support
-const tests: Array<{description: string, run: () => void, only: boolean}> = [];
+const tests: Array<{ description: string; run: () => void; only: boolean }> =
+  [];
 let hasOnlyTests = false;
 
 function test(description: string, run: () => void) {
@@ -16,7 +17,7 @@ function test(description: string, run: () => void) {
     only: () => {
       testObj.only = true;
       hasOnlyTests = true;
-    }
+    },
   };
 }
 
@@ -48,7 +49,7 @@ test("push elements to resize the capacity of the array", () => {
   assert.equal(arr.capacity, 4);
   arr.push(5);
   assert.equal(arr.capacity, 8);
-})
+});
 
 test("initialize array with preset values with of", () => {
   const arr = createSimpleArray();
@@ -80,7 +81,7 @@ test("set some indices to a given value", () => {
   assert.throws(() => arr.set(4, 10), { message: "Index 4 out of bounds" });
 });
 
-test('pop off some values from the array', () => {
+test("pop off some values from the array", () => {
   const arr = createSimpleArray();
   const poppedElement = arr.pop();
   assert.equal(poppedElement, 3);
@@ -93,8 +94,7 @@ test('pop off some values from the array', () => {
 test("minimize the capacity of array after popping under threshold", () => {
   const arr = MyArray.of(1, 2, 3, 4, 5, 6, 7, 8);
   assert.equal(arr.capacity, 8);
-  for (let i=0; i<=6; i++)
-    arr.pop();
+  for (let i = 0; i <= 6; i++) arr.pop();
   assert.equal(arr.capacity, 4);
 });
 
