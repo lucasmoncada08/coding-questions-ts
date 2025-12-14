@@ -4,16 +4,23 @@ export function arrayIntersection(arrOne: number[], arrTwo: number[]): number[] 
     let arrOneIndex = 0;
     let arrTwoIndex = 0;
 
-    while (arrOneIndex < arrOne.length || arrTwoIndex < arrTwo.length) {
-        const valOne = arrOne[arrOneIndex] ?? Infinity;
-        const valTwo = arrTwo[arrTwoIndex] ?? Infinity;
-        if (valOne <= valTwo) {
-            combinedArr.push(valOne);
+    while (arrOneIndex < arrOne.length && arrTwoIndex < arrTwo.length) {
+        if (arrOne[arrOneIndex] <= arrTwo[arrTwoIndex]) {
+            combinedArr.push(arrOne[arrOneIndex]);
             arrOneIndex++;
         } else {
-            combinedArr.push(valTwo);
+            combinedArr.push(arrTwo[arrTwoIndex]);
             arrTwoIndex++;
         }
     }
+    
+    for (let i=arrOneIndex; i<arrOne.length; i++) {
+        combinedArr.push(arrOne[i]);
+    }
+
+    for (let i=arrTwoIndex; i<arrTwo.length; i++) {
+        combinedArr.push(arrTwo[i]);
+    }
+
     return combinedArr;
 }
