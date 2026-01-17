@@ -1,70 +1,69 @@
 export function mergeThreeArraysQuick(a: number[], b: number[], c: number[]): number[] {
-let result: number[] = [];
+    const result: number[] = [];
+    const totalLength = a.length + b.length + c.length;
 
-// loop through all three arrays and get the min of them all
-    let combinedArrayLength = a.length + b.length + c.length;
-    
     let aIndex = 0;
     let bIndex = 0;
     let cIndex = 0;
 
-    while (result.length < combinedArrayLength) {
-        if (a[aIndex] < b[bIndex]) {
-            if (b[bIndex] < c[cIndex]) 
-                result.push(b[bIndex++]);
-            else
-                result.push(c[cIndex++]);
+    while (result.length < totalLength) {
+
+        const aValue = aIndex < a.length ? a[aIndex] : Infinity;
+        const bValue = bIndex < b.length ? b[bIndex] : Infinity;
+        const cValue = cIndex < c.length ? c[cIndex] : Infinity;
+        
+        if (aValue < bValue && aValue < cValue) {
+            result.push(aValue);
+            aIndex++;
+        } else if (bValue < cValue) {
+            result.push(bValue);
+            bIndex++;
         } else {
-            if (a[aIndex] < c[cIndex])
-                result.push(a[aIndex++]);
-            else
-                result.push(c[cIndex++]);
+            result.push(cValue);
+            cIndex++;
         }
     }
+
+    return result;
 }
 
 export function mergeThreeArrays(a: number[], b: number[], c: number[]): number[] {
     // merge array a and b
     const mergeResultAB: number[] = [];
 
-    let aIndex = 0;
-    let bIndex = 0;
-    while (aIndex < a.length && bIndex < a.length) {
-        if (a[aIndex] < b[bIndex])
-            mergeResultAB.push(a[aIndex++]);
-        else
-            mergeResultAB.push(b[bIndex++]);
-    }
-    console.log({mergeResultAB});
-
-    // handle adding extras
-    while (aIndex < a.length) {
-        mergeResultAB.push(a[aIndex++]);
-    }
-    while (bIndex < b.length) {
-        mergeResultAB.push(b[bIndex++]);
-    }
-    console.log({mergeResultAB});
+    mergeTwoArrays(a, b, mergeResultAB);
 
     const mergeResultAll: number[] = [];
-    let mergeABIndex = 0;
-    let cIndex = 0; 
-    while (mergeABIndex < mergeResultAB.length && cIndex < c.length) {
-        if (mergeResultAB[mergeABIndex] < c[cIndex]) 
-            mergeResultAll.push(mergeResultAB[mergeABIndex++]);
-        else
-            mergeResultAll.push(c[cIndex++]);
-    }
-    console.log({result: mergeResultAll});
-
-    // handle adding extras
-    while (mergeABIndex < mergeResultAB.length) {
-        mergeResultAll.push(a[aIndex++]);
-    }
-    while (cIndex < c.length) {
-        mergeResultAll.push(c[cIndex++]);
-    }
-    console.log({result: mergeResultAll});
+    mergeTwoArrays(mergeResultAB, c, mergeResultAll);
 
     return mergeResultAll;
 }
+
+function mergeTwoArrays(a: number[], b: number[], mergeResult: number[]) {
+    const { aIndex, bIndex } = mergeUntilEndOfEither(a, b, mergeResult);
+
+    pushAnyRemainingElements(aIndex, a, mergeResult);
+    pushAnyRemainingElements(bIndex, b, mergeResult);
+}
+function pushAnyRemainingElements(aIndex: number, a: number[], mergeResult: number[]) {
+    while (aIndex < a.length) {
+        mergeResult.push(a[aIndex++]);
+    }
+}
+
+function mergeUntilEndOfEither(a: number[], b: number[], mergeResult: number[]) {
+    let aIndex = 0;
+    let bIndex = 0;
+    
+    while (aIndex < a.length && bIndex < b.length) {
+        if (a[aIndex] < b[bIndex]) {
+            mergeResult.push(a[aIndex++]); 
+        }
+        else {
+            mergeResult.push(b[bIndex++]);
+        }
+            
+    }
+    return { aIndex, bIndex };
+}
+
