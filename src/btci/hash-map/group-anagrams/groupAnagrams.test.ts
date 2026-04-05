@@ -9,6 +9,22 @@ describe("groupAnagrams", () => {
       ["eat", "tae", "table", "bleat", "aet", "tabel", "aaa"],
       [["eat", "tae", "aet"], ["table", "bleat", "tabel"], ["aaa"]],
     ],
+    // empty strings group together
+    [["", "", "a"], [["", ""], ["a"]]],
+    // all unique — each string is its own group
+    [["abc", "def", "ghi"], [["abc"], ["def"], ["ghi"]]],
+    // long repeated characters
+    [
+      ["aaaaab", "baaaaa", "aaaaac"],
+      [["aaaaab", "baaaaa"], ["aaaaac"]],
+    ],
+    // strings with spaces
+    [
+      ["a b", "b a", " ab", "ba "],
+      [["a b", "b a", " ab", "ba "]],
+    ],
+    // single empty array
+    [[], []],
   ];
 
   it.each(cases)("groupAnagrams(%j) should return %j", (input, expected) => {
