@@ -1,12 +1,27 @@
-export function groupAnagrams(strs: string[]): string[][] {
+function sortedKey(str: string): string {
+  return str.split("").sort().join("");
+}
+
+function frequencyKey(str: string): string {
+  const counts = new Array(26).fill(0);
+  for (const char of str) {
+    counts[char.charCodeAt(0) - 97]++;
+  }
+  return counts.join(",");
+}
+
+export function groupAnagrams(
+  strs: string[],
+  keyFn: (str: string) => string = sortedKey
+): string[][] {
   const anagramMap: Record<string, string[]> = {};
 
   for (const str of strs) {
-    const sorted = str.split("").sort().join("");
-    if (!anagramMap[sorted]) {
-      anagramMap[sorted] = [];
+    const key = keyFn(str);
+    if (!anagramMap[key]) {
+      anagramMap[key] = [];
     }
-    anagramMap[sorted].push(str);
+    anagramMap[key].push(str);
   }
 
   const result: string[][] = [];
@@ -16,3 +31,5 @@ export function groupAnagrams(strs: string[]): string[][] {
 
   return result;
 }
+
+export { sortedKey, frequencyKey };

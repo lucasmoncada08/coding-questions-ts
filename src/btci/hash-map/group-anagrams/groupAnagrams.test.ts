@@ -1,9 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { groupAnagrams } from "./groupAnagrams";
+import { groupAnagrams, sortedKey, frequencyKey } from "./groupAnagrams";
 
 type TestCase = [input: string[], expected: string[][]];
 
-describe("groupAnagrams", () => {
+const sort = (groups: string[][]) =>
+  groups.map((g) => [...g].sort()).sort((a, b) => a[0].localeCompare(b[0]));
+
+describe("groupAnagrams (sortedKey)", () => {
   const cases: TestCase[] = [
     [
       ["eat", "tae", "table", "bleat", "aet", "tabel", "aaa"],
@@ -28,9 +31,30 @@ describe("groupAnagrams", () => {
   ];
 
   it.each(cases)("groupAnagrams(%j) should return %j", (input, expected) => {
-    const result = groupAnagrams(input);
-    const sort = (groups: string[][]) =>
-      groups.map((g) => [...g].sort()).sort((a, b) => a[0].localeCompare(b[0]));
+    const result = groupAnagrams(input, sortedKey);
+    expect(sort(result)).toEqual(sort(expected));
+  });
+});
+
+describe("groupAnagrams (frequencyKey)", () => {
+  const cases: TestCase[] = [
+    [
+      ["eat", "tae", "table", "bleat", "aet", "tabel", "aaa"],
+      [["eat", "tae", "aet"], ["table", "bleat", "tabel"], ["aaa"]],
+    ],
+    // all unique — each string is its own group
+    [["abc", "def", "ghi"], [["abc"], ["def"], ["ghi"]]],
+    // long repeated characters
+    [
+      ["aaaaab", "baaaaa", "aaaaac"],
+      [["aaaaab", "baaaaa"], ["aaaaac"]],
+    ],
+    // single empty array
+    [[], []],
+  ];
+
+  it.each(cases)("groupAnagrams(%j) should return %j", (input, expected) => {
+    const result = groupAnagrams(input, frequencyKey);
     expect(sort(result)).toEqual(sort(expected));
   });
 });
